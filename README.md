@@ -11,9 +11,9 @@ mvn spring-boot:run
 Or, if you have Maven Wrapper:
 
 bash
-Copiar código
-./mvnw spring-boot:run   # Linux/macOS
-mvnw.cmd spring-boot:run  # Windows
+./mvnw spring-boot:run   
+mvnw.cmd spring-boot:run
+
 Open http://localhost:8080 with your browser to see the result.
 You should see the message:
 
