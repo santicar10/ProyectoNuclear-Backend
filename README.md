@@ -10,8 +10,8 @@ First, run the development server:
 mvn spring-boot:run
 Or, if you have Maven Wrapper:
 
-bash
-./mvnw spring-boot:run   
+./mvnw spring-boot:run
+or
 mvnw.cmd spring-boot:run
 
 Open http://localhost:8080 with your browser to see the result.
