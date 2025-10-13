@@ -15,7 +15,4 @@ bash
 mvnw.cmd spring-boot:run
 
 Open http://localhost:8080 with your browser to see the result.
-You should see the message:
-
-Copiar código
-¡Aplicación funcionando!
+You should see the message:¡Aplicación funcionando!
