@@ -54,7 +54,20 @@ public class UsuarioService {
         usuario.setFecha_creacion(LocalDate.now());
         usuario.setEstado(Usuario.Estado.activo);
 
+        // Asignar rol por defecto si no viene proporcionado (usar la constante del enum Usuario.Rol)
+        if (usuario.getRol() == null) {
+            usuario.setRol(Usuario.Rol.voluntario);
+        }
+
         return usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Comprueba si ya existe un usuario con el correo dado.
+     * Útil para validaciones desde controladores.
+     */
+    public boolean existsByCorreo(String correo) {
+        return usuarioRepository.existsByCorreo(correo);
     }
 
     /**

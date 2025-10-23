@@ -1,11 +1,17 @@
 package com.huahuacuna.app.controller;
 
 import com.huahuacuna.app.DTO.RecuperarDTO;
+import com.huahuacuna.app.DTO.RegistroDTO;
 import com.huahuacuna.app.model.Usuario;
 import com.huahuacuna.app.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * Controlador REST para operaciones sobre usuarios.
@@ -53,8 +59,30 @@ public class UsuarioController {
      * @return Usuario persistido (puede incluir id generado)
      */
     @PostMapping("/registro")
-    public Usuario registrar(@RequestBody Usuario usuario) {
-        return usuarioService.registrar(usuario);
+    public ResponseEntity<?> registrar(@Valid @RequestBody RegistroDTO dto) {
+        // Normalizar correo
+        String correo = dto.getCorreo().trim().toLowerCase();
+
+        // Verificar existencia
+        if (usuarioService.existsByCorreo(correo)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("mensaje", "El correo ya está registrado."));
+        }
+
+        // Mapear dto -> entidad
+        Usuario usuario = new Usuario();
+        usuario.setCorreo(correo);
+        usuario.setNombre(dto.getNombre().trim());
+        // La contraseña se hasheará en el servicio antes de persistir
+        usuario.setContrasena(dto.getContrasena());
+
+        Usuario saved = usuarioService.registrar(usuario);
+
+        // Responder con datos mínimos (no enviar contraseña)
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "usuarioId", saved.getId_usuario(),
+                "correo", saved.getCorreo(),
+                "nombre", saved.getNombre()
+        ));
     }
 
     /**
