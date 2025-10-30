@@ -6,7 +6,9 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -109,5 +111,94 @@ public class UsuarioService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public void iniciarRecuperacion(String correo) throws MessagingException {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+        if (usuarioOpt.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado");
+        }
+        Usuario usuario = usuarioOpt.get();
+
+        // Generar código numérico de 6 dígitos
+        String codigo = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+
+        // Guardar código y expiración (por ejemplo 15 minutos)
+        usuario.setRecoveryCode(codigo);
+        usuario.setRecoveryExpiry(LocalDateTime.now().plusMinutes(15));
+        usuarioRepository.save(usuario);
+
+        // Enviar correo (reutiliza EmailService.enviarRecuperacion pero ajusta el cuerpo)
+        emailService.enviarRecuperacionCodigo(usuario.getCorreo(), usuario.getNombre(), codigo);
+    }
+
+    public boolean verificarCodigo(String correo, String codigo) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+        Usuario usuario = usuarioOpt.get();
+        if (usuario.getRecoveryCode() == null || usuario.getRecoveryExpiry() == null) {
+            return false;
+        }
+        if (!usuario.getRecoveryCode().equals(codigo)) {
+            return false;
+        }
+        if (usuario.getRecoveryExpiry().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean resetContrasena(String correo, String codigo, String nuevaContrasena) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByCorreo(correo);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+        Usuario usuario = usuarioOpt.get();
+        if (usuario.getRecoveryCode() == null || usuario.getRecoveryExpiry() == null) {
+            return false;
+        }
+        if (!usuario.getRecoveryCode().equals(codigo)) {
+            return false;
+        }
+        if (usuario.getRecoveryExpiry().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        // Aquí: cambiar contraseña. Recomiendo hashear con BCrypt. Ejemplo simple:
+        usuario.setContrasena(nuevaContrasena); // <- reemplazar por passwordEncoder.encode(nuevaContrasena) si usas BCrypt
+        // Limpiar los campos de recuperación
+        usuario.setRecoveryCode(null);
+        usuario.setRecoveryExpiry(null);
+        usuarioRepository.save(usuario);
+        return true;
+    }
+
+    /**
+     * Cambia la contraseña de un usuario identificado por idUsuario.
+     * Verifica que la contrasenaActual coincida con la guardada.
+     *
+     * @param idUsuario id del usuario a modificar
+     * @param contrasenaActual contraseña proporcionada por el usuario
+     * @param nuevaContrasena nueva contraseña a guardar
+     * @return true si se cambió la contraseña, false si la actual no coincide o el usuario no existe
+     */
+    public boolean cambiarContrasena(Integer idUsuario, String contrasenaActual, String nuevaContrasena) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        // Comparación directa (texto plano). Si migras a hashes, usar PasswordEncoder.matches(...)
+        if (!usuario.getContrasena().equals(contrasenaActual)) {
+            return false;
+        }
+
+        usuario.setContrasena(nuevaContrasena);
+        usuarioRepository.save(usuario);
+        return true;
     }
 }
