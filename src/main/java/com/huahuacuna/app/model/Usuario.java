@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Entidad JPA que representa un usuario de la aplicación.
@@ -89,6 +90,22 @@ public class Usuario {
      */
     @Enumerated(EnumType.STRING)
     private Estado estado;
+
+    /**
+     * -----------------------
+     * Campos añadidos para recuperación de contraseña por código
+     * -----------------------
+     *
+     * recoveryCode: código numérico de 6 dígitos enviado por email para la recuperación.
+     * recoveryExpiry: fecha y hora de expiración del código (ej. ahora + 15 minutos).
+     *
+     * Ambos campos son nullable en la BD y se deben limpiar después de usar el código.
+     */
+    @Column(name = "recovery_code", nullable = true)
+    private String recoveryCode;
+
+    @Column(name = "recovery_expiry", nullable = true)
+    private LocalDateTime recoveryExpiry;
 
     /**
      * Roles posibles que puede tener un usuario en el sistema.

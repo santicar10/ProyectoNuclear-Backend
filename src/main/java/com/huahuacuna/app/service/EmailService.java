@@ -56,4 +56,11 @@ public class EmailService {
                 "\n\nPor favor cámbiala cuando inicies sesión.";
         emailUtil.sendEmail(fromEmail, mailPassword, toEmail, subject, body);
     }
+
+    public void enviarRecuperacionCodigo(String toEmail, String nombre, String codigo) throws MessagingException {
+        String subject = "Código de recuperación - Fundación Huahuacuna";
+        String body = "Hola " + nombre + ",\n\nTu código de recuperación es: " + codigo +
+                "\n\nIngresa este código en la aplicación para poder restablecer tu contraseña. El código expira en 15 minutos.";
+        emailUtil.sendEmail(fromEmail, mailPassword, toEmail, subject, body);
+    }
 }

@@ -1,10 +1,9 @@
 package com.huahuacuna.app.controller;
 
-import com.huahuacuna.app.DTO.CambiarContrasenaDTO;
-import com.huahuacuna.app.DTO.RecuperarDTO;
-import com.huahuacuna.app.DTO.RegistroDTO;
+import com.huahuacuna.app.DTO.*;
 import com.huahuacuna.app.model.Usuario;
 import com.huahuacuna.app.service.UsuarioService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,16 +45,36 @@ public class UsuarioController {
     }
 
     @PostMapping("/recuperar")
-    public ResponseEntity<?> recuperar(@RequestBody RecuperarDTO request) {
-        boolean resultado = usuarioService.recuperarContrasena(request.getCorreo());
-        if (resultado) {
-            return ResponseEntity.ok(Map.of(
-                    "mensaje", "Se ha enviado una nueva contraseña a tu correo."
-            ));
+    public ResponseEntity<?> iniciarRecuperacion(@Valid @RequestBody RecuperarRequestDTO dto) {
+        try {
+            usuarioService.iniciarRecuperacion(dto.getCorreo());
+            // Por seguridad no confirmamos si el correo existe o no en la respuesta pública.
+            return ResponseEntity.ok(Map.of("mensaje", "Si el correo existe, se ha enviado un código de recuperación."));
+        } catch (IllegalArgumentException e) {
+            // Podemos devolver 200 con el mismo mensaje para evitar enumeración de usuarios
+            return ResponseEntity.ok(Map.of("mensaje", "Si el correo existe, se ha enviado un código de recuperación."));
+        } catch (MessagingException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("mensaje", "Error enviando el correo."));
+        }
+    }
+
+    @PostMapping("/recuperar/verificar")
+    public ResponseEntity<?> verificarCodigo(@Valid @RequestBody VerificarCodigoDTO dto) {
+        boolean ok = usuarioService.verificarCodigo(dto.getCorreo(), dto.getCodigo());
+        if (ok) {
+            return ResponseEntity.ok(Map.of("mensaje", "Código válido."));
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
-                    "mensaje", "No se encontró ningún usuario con ese correo."
-            ));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("mensaje", "Código inválido o expirado."));
+        }
+    }
+
+    @PostMapping("/recuperar/reset")
+    public ResponseEntity<?> resetContrasena(@Valid @RequestBody ResetContrasenaDTO dto) {
+        boolean ok = usuarioService.resetContrasena(dto.getCorreo(), dto.getCodigo(), dto.getNuevaContrasena());
+        if (ok) {
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña restablecida correctamente."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("mensaje", "Código inválido o expirado."));
         }
     }
 
