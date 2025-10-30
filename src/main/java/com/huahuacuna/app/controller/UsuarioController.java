@@ -1,5 +1,6 @@
 package com.huahuacuna.app.controller;
 
+import com.huahuacuna.app.DTO.CambiarContrasenaDTO;
 import com.huahuacuna.app.DTO.RecuperarDTO;
 import com.huahuacuna.app.DTO.RegistroDTO;
 import com.huahuacuna.app.model.Usuario;
@@ -57,6 +58,22 @@ public class UsuarioController {
             ));
         }
     }
+
+    @PostMapping("/cambiar")
+    public ResponseEntity<?> cambiarContrasena(@Valid @RequestBody CambiarContrasenaDTO dto, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", "Debe iniciar sesión para cambiar la contraseña."));
+        }
+
+        boolean cambiado = usuarioService.cambiarContrasena(usuario.getId_usuario(), dto.getContrasenaActual(), dto.getNuevaContrasena());
+        if (cambiado) {
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña cambiada correctamente."));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("mensaje", "La contraseña actual es incorrecta."));
+        }
+    }
+
 
     @GetMapping("/perfil")
     public ResponseEntity<?> verPerfil(HttpSession session) {

@@ -110,4 +110,30 @@ public class UsuarioService {
             return false;
         }
     }
+    /**
+     * Cambia la contraseña de un usuario identificado por idUsuario.
+     * Verifica que la contrasenaActual coincida con la guardada.
+     *
+     * @param idUsuario id del usuario a modificar
+     * @param contrasenaActual contraseña proporcionada por el usuario
+     * @param nuevaContrasena nueva contraseña a guardar
+     * @return true si se cambió la contraseña, false si la actual no coincide o el usuario no existe
+     */
+    public boolean cambiarContrasena(Integer idUsuario, String contrasenaActual, String nuevaContrasena) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
+        if (usuarioOpt.isEmpty()) {
+            return false;
+        }
+
+        Usuario usuario = usuarioOpt.get();
+
+        // Comparación directa (texto plano). Si migras a hashes, usar PasswordEncoder.matches(...)
+        if (!usuario.getContrasena().equals(contrasenaActual)) {
+            return false;
+        }
+
+        usuario.setContrasena(nuevaContrasena);
+        usuarioRepository.save(usuario);
+        return true;
+    }
 }
