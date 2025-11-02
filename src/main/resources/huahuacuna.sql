@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 19-10-2025 a las 21:13:10
+-- Tiempo de generación: 02-11-2025 a las 22:02:18
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -39,18 +39,88 @@ CREATE TABLE `apadrinamientos` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `bitacora`
+--
+
+CREATE TABLE `bitacora` (
+  `id_bitacora` int(11) NOT NULL,
+  `id_nino` int(11) NOT NULL,
+  `fecha_registro` date NOT NULL,
+  `descripcion` text NOT NULL,
+  `foto_url` varchar(255) DEFAULT NULL,
+  `video_url` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `contenido`
+--
+
+CREATE TABLE `contenido` (
+  `id_contenido` int(11) NOT NULL,
+  `tipo` enum('imagen','video','documento') NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `titulo` varchar(100) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `fecha_subida` date NOT NULL,
+  `seccion` enum('proyecto','evento','fundacion','otro') DEFAULT 'otro'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `donaciones`
+--
+
+CREATE TABLE `donaciones` (
+  `id_donacion` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `tipo` enum('monetaria','material') NOT NULL,
+  `monto` decimal(10,2) DEFAULT NULL,
+  `descripcion` text DEFAULT NULL,
+  `fecha_donacion` date NOT NULL,
+  `estado` enum('pendiente','completada','cancelada') DEFAULT 'pendiente'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `ninos`
 --
 
 CREATE TABLE `ninos` (
   `id_nino` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `edad` int(11) NOT NULL,
-  `genero` varchar(10) DEFAULT NULL,
-  `descripcion` text DEFAULT NULL,
+  `genero` varchar(255) NOT NULL,
+  `descripcion` varchar(500) DEFAULT NULL,
   `foto_url` varchar(255) DEFAULT NULL,
   `estado_apadrinamiento` enum('Disponible','Apadrinado','Inactivo') DEFAULT 'Disponible',
   `fecha_registro` date DEFAULT curdate()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `ninos`
+--
+
+INSERT INTO `ninos` (`id_nino`, `nombre`, `edad`, `genero`, `descripcion`, `foto_url`, `estado_apadrinamiento`, `fecha_registro`) VALUES
+(1, 'pepito', 8, 'masculino', 'Niño timido y responsable', 'aaaa', 'Apadrinado', '2025-11-02'),
+(3, 'pepe', 9, 'masculino', 'Niño estrovertido y alegre', 'eeee', 'Disponible', '2025-11-02');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `noticias`
+--
+
+CREATE TABLE `noticias` (
+  `id_noticia` int(11) NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `contenido` text NOT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
+  `fecha_publicacion` date NOT NULL,
+  `estado` enum('publicado','borrador') DEFAULT 'publicado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -61,12 +131,21 @@ CREATE TABLE `ninos` (
 
 CREATE TABLE `proyectos` (
   `id_proyecto` int(11) NOT NULL,
-  `nombre_proyecto` varchar(100) NOT NULL,
-  `descripcion` text DEFAULT NULL,
+  `nombre_proyecto` varchar(255) NOT NULL,
+  `descripcion` varchar(255) NOT NULL,
   `fecha_inicio` date DEFAULT NULL,
   `fecha_fin` date DEFAULT NULL,
-  `estado` enum('Activo','Inactivo','Finalizado') DEFAULT 'Activo'
+  `estado` enum('ACTIVO','INACTIVO','FINALIZADO') DEFAULT 'ACTIVO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `proyectos`
+--
+
+INSERT INTO `proyectos` (`id_proyecto`, `nombre_proyecto`, `descripcion`, `fecha_inicio`, `fecha_fin`, `estado`) VALUES
+(2, 'clases de musica', 'Proyecto para enseñar a los niños a tocar instrumentos', '2025-04-24', '2025-12-14', 'INACTIVO'),
+(3, 'clases de futbol', 'Proyecto para enseñar a los niños a jugar futbol', '2025-02-02', '2025-09-09', 'FINALIZADO'),
+(4, 'Huerto Escolar', 'Proyecto para enseñar a los niños sobre agricultura sostenible.', '2025-10-01', '2026-03-01', 'ACTIVO');
 
 -- --------------------------------------------------------
 
@@ -83,18 +162,21 @@ CREATE TABLE `usuarios` (
   `direccion` varchar(255) DEFAULT NULL,
   `rol` enum('administrador','voluntario','padrino') NOT NULL,
   `fecha_creacion` date NOT NULL,
-  `estado` enum('activo','inactivo') NOT NULL
+  `estado` enum('activo','inactivo') NOT NULL,
+  `recovery_code` varchar(255) DEFAULT NULL,
+  `recovery_expiry` datetime(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `telefono`, `direccion`, `rol`, `fecha_creacion`, `estado`) VALUES
-(1, 'Juan Pérez', 'juan@gmail.com', '12345', '3001234567', 'Calle 10 #5-20', 'padrino', '2025-10-13', 'activo'),
-(2, 'Juan Perez', 'juan.perez@example.com', '12345678', '3001234567', 'Calle 123', 'voluntario', '2025-10-18', 'activo'),
-(3, 'Juan Diego', 't4mara95@gmail.com', 'go7BmK4t', '3001234567', 'Calle 123', 'administrador', '2025-10-18', 'activo'),
-(4, 'Juanito perez', 'juanperez@example.com', '56789', '30000004', 'Centro', 'voluntario', '2025-10-19', 'activo');
+INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `telefono`, `direccion`, `rol`, `fecha_creacion`, `estado`, `recovery_code`, `recovery_expiry`) VALUES
+(1, 'Juan Pérez', 'juan@gmail.com', '12345', '3001234567', 'Calle 10 #5-20', 'padrino', '2025-10-13', 'activo', NULL, NULL),
+(2, 'Juan Perez', 'juan.perez@example.com', '12345678', '3001234567', 'Calle 123', 'voluntario', '2025-10-18', 'activo', NULL, NULL),
+(3, 'Juan Diego', 't4mara95@gmail.com', 'go7BmK4t', '3001234567', 'Calle 123', 'administrador', '2025-10-18', 'activo', NULL, NULL),
+(4, 'Juanito perez', 'juanperez@example.com', '56789', '30000004', 'Centro', 'voluntario', '2025-10-19', 'activo', NULL, NULL),
+(5, 'jose', 'jose123@gmail.com', 'jose20', NULL, NULL, 'voluntario', '2025-11-02', 'activo', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -106,9 +188,16 @@ CREATE TABLE `voluntariado` (
   `id_voluntariado` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `id_proyecto` int(11) NOT NULL,
-  `rol_voluntario` varchar(50) DEFAULT NULL,
+  `rol_voluntario` varchar(255) DEFAULT NULL,
   `fecha_inscripcion` date DEFAULT curdate()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `voluntariado`
+--
+
+INSERT INTO `voluntariado` (`id_voluntariado`, `id_usuario`, `id_proyecto`, `rol_voluntario`, `fecha_inscripcion`) VALUES
+(1, 5, 4, 'Colaborador', '2025-11-02');
 
 --
 -- Índices para tablas volcadas
@@ -123,10 +212,36 @@ ALTER TABLE `apadrinamientos`
   ADD KEY `id_nino` (`id_nino`);
 
 --
+-- Indices de la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  ADD PRIMARY KEY (`id_bitacora`),
+  ADD KEY `id_nino` (`id_nino`);
+
+--
+-- Indices de la tabla `contenido`
+--
+ALTER TABLE `contenido`
+  ADD PRIMARY KEY (`id_contenido`);
+
+--
+-- Indices de la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  ADD PRIMARY KEY (`id_donacion`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
 -- Indices de la tabla `ninos`
 --
 ALTER TABLE `ninos`
   ADD PRIMARY KEY (`id_nino`);
+
+--
+-- Indices de la tabla `noticias`
+--
+ALTER TABLE `noticias`
+  ADD PRIMARY KEY (`id_noticia`);
 
 --
 -- Indices de la tabla `proyectos`
@@ -159,28 +274,52 @@ ALTER TABLE `apadrinamientos`
   MODIFY `id_apadrinamiento` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  MODIFY `id_bitacora` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `contenido`
+--
+ALTER TABLE `contenido`
+  MODIFY `id_contenido` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  MODIFY `id_donacion` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `ninos`
 --
 ALTER TABLE `ninos`
-  MODIFY `id_nino` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_nino` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `noticias`
+--
+ALTER TABLE `noticias`
+  MODIFY `id_noticia` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `proyectos`
 --
 ALTER TABLE `proyectos`
-  MODIFY `id_proyecto` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_proyecto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `voluntariado`
 --
 ALTER TABLE `voluntariado`
-  MODIFY `id_voluntariado` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_voluntariado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Restricciones para tablas volcadas
@@ -192,6 +331,18 @@ ALTER TABLE `voluntariado`
 ALTER TABLE `apadrinamientos`
   ADD CONSTRAINT `apadrinamientos_ibfk_1` FOREIGN KEY (`id_padrino`) REFERENCES `usuarios` (`id_usuario`),
   ADD CONSTRAINT `apadrinamientos_ibfk_2` FOREIGN KEY (`id_nino`) REFERENCES `ninos` (`id_nino`);
+
+--
+-- Filtros para la tabla `bitacora`
+--
+ALTER TABLE `bitacora`
+  ADD CONSTRAINT `bitacora_ibfk_1` FOREIGN KEY (`id_nino`) REFERENCES `ninos` (`id_nino`);
+
+--
+-- Filtros para la tabla `donaciones`
+--
+ALTER TABLE `donaciones`
+  ADD CONSTRAINT `donaciones_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
 
 --
 -- Filtros para la tabla `voluntariado`
