@@ -75,7 +75,6 @@ public class AuthController {
                     "usuarioId", usuario.get().getId_usuario()
             ));
         } else {
-            // No exponer detalles (por ejemplo, si el correo no existe o la contraseña está mal): mensaje genérico.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
                     "mensaje", "Credenciales inválidas"
             ));

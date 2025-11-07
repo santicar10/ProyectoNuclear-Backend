@@ -83,13 +83,17 @@ public class Usuario {
      *
      * <p>Si se requiere la hora exacta, cambiar a {@code OffsetDateTime} o {@code Instant}.</p>
      */
-    private LocalDate fecha_creacion;
+
+    @Column(name = "fecha_creacion", nullable = false)
+    private LocalDate fecha_creacion = LocalDate.now();
+
 
     /**
      * Estado del usuario (activo / inactivo).
      */
     @Enumerated(EnumType.STRING)
-    private Estado estado;
+    @Column(nullable = false)
+    private Estado estado = Estado.activo;
 
     /**
      * -----------------------
