@@ -100,6 +100,22 @@ public class NinoController {
         ninoService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    /**metodo publico para ver el perfil del nino
+     */
+    @GetMapping("/publico/{id}")
+    public ResponseEntity<?> verNinoPublico(@PathVariable Integer id) {
+        return ninoService.buscarPorId(id)
+                .map(nino -> Map.of(
+                        "nombre", nino.getNombre(),
+                        "edad", nino.getEdad(),
+                        "genero", nino.getGenero()
+                ))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(404).body(Map.of("mensaje", "Niño no encontrado.")));
+    }
+
 }
 
 
