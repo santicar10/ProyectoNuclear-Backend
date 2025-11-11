@@ -110,7 +110,8 @@ public class NinoController {
                 .map(nino -> Map.of(
                         "nombre", nino.getNombre(),
                         "edad", nino.getEdad(),
-                        "genero", nino.getGenero()
+                        "genero", nino.getGenero(),
+                        "foto", nino.getFotoUrl()
                 ))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(404).body(Map.of("mensaje", "Niño no encontrado.")));
