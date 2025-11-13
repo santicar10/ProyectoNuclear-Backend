@@ -99,7 +99,6 @@ public class ProyectoController {
             return user.getRol() == Usuario.Rol.administrador;
         }
         return false;
-
     }
 }
 

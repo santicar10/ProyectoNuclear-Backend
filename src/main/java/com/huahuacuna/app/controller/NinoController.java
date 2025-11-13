@@ -9,32 +9,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controlador REST para la gestión de niños.
- * Solo accesible para usuarios con rol "administrador".
- */
 @RestController
 @RequestMapping("/api/ninos")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+@CrossOrigin(origins = "http://localhost:3001", allowCredentials = "true")
 public class NinoController {
 
     @Autowired
     private NinoService ninoService;
 
-    /**
-     * Verifica si el usuario tiene permisos de administrador.
-     */
     private boolean esAdmin(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-        return usuario != null && "administrador".equalsIgnoreCase(String.valueOf(usuario.getRol()));
+        return usuario != null && usuario.getRol() == Usuario.Rol.administrador;
     }
 
-    /**
-     * Listar todos los niños.
-     */
     @GetMapping
     public ResponseEntity<?> listarTodos(HttpSession session) {
         if (!esAdmin(session)) {
@@ -43,9 +34,6 @@ public class NinoController {
         return ResponseEntity.ok(ninoService.listarTodos());
     }
 
-    /**
-     * Buscar un niño por su ID.
-     */
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id, HttpSession session) {
         if (!esAdmin(session)) {
@@ -56,9 +44,6 @@ public class NinoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
-     * Crear un nuevo niño.
-     */
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody NinoDTO dto, HttpSession session) {
         if (!esAdmin(session)) {
@@ -88,10 +73,6 @@ public class NinoController {
         }
     }
 
-
-    /**
-     * Eliminar un niño por su ID.
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Integer id, HttpSession session) {
         if (!esAdmin(session)) {
@@ -101,22 +82,27 @@ public class NinoController {
         return ResponseEntity.noContent().build();
     }
 
-
-    /**metodo publico para ver el perfil del nino
+    /**
+     * Endpoint público para ver el perfil del niño
      */
     @GetMapping("/publico/{id}")
     public ResponseEntity<?> verNinoPublico(@PathVariable Integer id) {
         return ninoService.buscarPorId(id)
-                .map(nino -> Map.of(
-                        "nombre", nino.getNombre(),
-                        "edad", nino.getEdad(),
-                        "genero", nino.getGenero(),
-                        "foto", nino.getFotoUrl()
-                ))
-                .map(ResponseEntity::ok)
+                .map(nino -> {
+                    // Usar HashMap en lugar de Map.of() para permitir valores nulos
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("id_nino", nino.getId_nino());
+                    response.put("nombre", nino.getNombre() != null ? nino.getNombre() : "");
+                    response.put("edad", nino.getEdad());
+                    response.put("genero", nino.getGenero() != null ? nino.getGenero() : "");
+                    response.put("descripcion", nino.getDescripcion() != null ? nino.getDescripcion() : "");
+                    response.put("foto", nino.getFotoUrl()); 
+                    response.put("fotoUrl", nino.getFotoUrl()); 
+                    response.put("fechaNacimiento", nino.getFechaNacimiento() != null ? nino.getFechaNacimiento().toString() : null);
+                    response.put("estadoApadrinamiento", nino.getEstadoApadrinamiento() != null ? nino.getEstadoApadrinamiento().toString() : "");
+                    
+                    return ResponseEntity.ok(response);
+                })
                 .orElse(ResponseEntity.status(404).body(Map.of("mensaje", "Niño no encontrado.")));
     }
-
 }
-
-

@@ -17,10 +17,11 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Permitir credenciales
-        config.setAllowCredentials(false); // Cambiado a false
+        config.setAllowCredentials(true);
 
-        // Permitir todos los orígenes (para desarrollo)
-        config.addAllowedOriginPattern("*");
+        // Permitir todos los puertos de localhost
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("http://localhost:3001");
 
         // Permitir todos los headers
         config.addAllowedHeader("*");
@@ -28,7 +29,8 @@ public class CorsConfig {
         // Permitir todos los métodos HTTP
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
-        source.registerCorsConfiguration("/api/**", config);
+        // Aplicar a todas las rutas
+        source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 }
