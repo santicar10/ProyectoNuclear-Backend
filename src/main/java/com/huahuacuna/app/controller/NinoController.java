@@ -29,7 +29,8 @@ public class NinoController {
      */
     private boolean esAdmin(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
-        return usuario != null && "administrador".equalsIgnoreCase(String.valueOf(usuario.getRol()));
+        
+        return usuario != null && usuario.getRol() == Usuario.Rol.administrador;
     }
 
     /**

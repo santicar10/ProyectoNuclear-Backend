@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 /**
  * Entidad que representa a un niño registrado en la fundación.
@@ -22,8 +23,8 @@ public class Nino {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
-    private Integer edad;
+    @Column(name = "fecha_nacimiento", nullable = false)
+    private LocalDate fechaNacimiento;
 
     @Column(nullable = false)
     private String genero;
@@ -41,10 +42,21 @@ public class Nino {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDate fechaRegistro = LocalDate.now();
 
+    /**
+     * Método getter que calcula la edad dinámicamente
+     * No se persiste en la BD
+     */
+    @Transient 
+    public Integer getEdad() {
+        if (this.fechaNacimiento == null) {
+            return 0;
+        }
+        return Period.between(this.fechaNacimiento, LocalDate.now()).getYears();
+    }
+
     public enum EstadoApadrinamiento {
         Disponible,
         Apadrinado,
         Inactivo
     }
 }
-
