@@ -1,3 +1,4 @@
+// src/main/java/com/huahuacuna/app/controller/NinoController.java
 package com.huahuacuna.app.controller;
 
 import com.huahuacuna.app.DTO.NinoDTO;
@@ -26,10 +27,16 @@ public class NinoController {
         return usuario != null && usuario.getRol() == Usuario.Rol.administrador;
     }
 
+    private boolean esPadrino(HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        return usuario != null && usuario.getRol() == Usuario.Rol.padrino;
+    }
+
     @GetMapping
     public ResponseEntity<?> listarTodos(HttpSession session) {
-        if (!esAdmin(session)) {
-            return ResponseEntity.status(403).body(Map.of("mensaje", "Acceso denegado: solo administradores."));
+        // Permitir acceso a administradores Y padrinos
+        if (!esAdmin(session) && !esPadrino(session)) {
+            return ResponseEntity.status(403).body(Map.of("mensaje", "Acceso denegado: solo administradores y padrinos."));
         }
         return ResponseEntity.ok(ninoService.listarTodos());
     }
@@ -82,14 +89,10 @@ public class NinoController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Endpoint público para ver el perfil del niño
-     */
     @GetMapping("/publico/{id}")
     public ResponseEntity<?> verNinoPublico(@PathVariable Integer id) {
         return ninoService.buscarPorId(id)
                 .map(nino -> {
-                    // Usar HashMap en lugar de Map.of() para permitir valores nulos
                     Map<String, Object> response = new HashMap<>();
                     response.put("id_nino", nino.getId_nino());
                     response.put("nombre", nino.getNombre() != null ? nino.getNombre() : "");
