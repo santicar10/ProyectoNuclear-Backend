@@ -3,6 +3,7 @@ package com.huahuacuna.app.controller;
 import com.huahuacuna.app.DTO.*;
 import com.huahuacuna.app.model.Usuario;
 import com.huahuacuna.app.service.UsuarioService;
+import com.huahuacuna.app.DTO.ActualizarPerfilDTO;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -196,5 +197,27 @@ public class UsuarioController {
         return ResponseEntity.ok(Map.of(
                 "mensaje", "Sesión cerrada correctamente."
         ));
+    }
+    /**
+     * Actualiza el perfil del usuario actualmente en sesión.
+     *
+     * @param dto DTO con los datos a actualizar (nombre, telefono, direccion).
+     * @param session HttpSession donde se busca el usuario bajo "usuarioLogueado".
+     * @return 200 OK con el usuario actualizado; 401 UNAUTHORIZED si no hay sesión activa.
+     */
+    @PatchMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(@Valid @RequestBody ActualizarPerfilDTO dto, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("mensaje", "Debe iniciar sesión para actualizar su perfil."));
+        }
+
+        Usuario usuarioActualizado = usuarioService.actualizarPerfil(usuario.getId_usuario(), dto);
+        
+        // Actualizar el usuario en la sesión
+        session.setAttribute("usuarioLogueado", usuarioActualizado);
+        
+        return ResponseEntity.ok(usuarioActualizado);
     }
 }

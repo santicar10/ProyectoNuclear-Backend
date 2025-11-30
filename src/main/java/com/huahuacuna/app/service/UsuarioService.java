@@ -1,10 +1,13 @@
+// src/main/java/com/huahuacuna/app/service/UsuarioService.java
 package com.huahuacuna.app.service;
 
+import com.huahuacuna.app.DTO.ActualizarPerfilDTO;
 import com.huahuacuna.app.model.Usuario;
 import com.huahuacuna.app.repository.UsuarioRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -200,5 +203,25 @@ public class UsuarioService {
         usuario.setContrasena(nuevaContrasena);
         usuarioRepository.save(usuario);
         return true;
+    }
+
+    /**
+     * Actualiza el perfil de un usuario (nombre, teléfono, dirección).
+     *
+     * @param idUsuario id del usuario a actualizar
+     * @param dto DTO con los nuevos datos del perfil
+     * @return Usuario actualizado
+     * @throws IllegalArgumentException si el usuario no existe
+     */
+    @Transactional
+    public Usuario actualizarPerfil(Integer idUsuario, ActualizarPerfilDTO dto) {
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        
+        usuario.setNombre(dto.getNombre().trim());
+        usuario.setTelefono(dto.getTelefono() != null ? dto.getTelefono().trim() : null);
+        usuario.setDireccion(dto.getDireccion() != null ? dto.getDireccion().trim() : null);
+        
+        return usuarioRepository.save(usuario);
     }
 }
