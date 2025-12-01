@@ -72,7 +72,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of(
                     "mensaje", "Inicio de sesión exitoso",
                     "rol", usuario.get().getRol(),
-                    "usuarioId", usuario.get().getId_usuario()
+                    "usuarioId", usuario.get().getIdUsuario()
             ));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(

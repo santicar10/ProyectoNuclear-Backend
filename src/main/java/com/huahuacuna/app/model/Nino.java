@@ -18,7 +18,7 @@ public class Nino {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id_nino;
+    private Integer idNino;
 
     @Column(nullable = false)
     private String nombre;

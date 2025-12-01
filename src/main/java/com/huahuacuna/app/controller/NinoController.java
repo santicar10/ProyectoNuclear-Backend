@@ -91,7 +91,7 @@ public class NinoController {
                 .map(nino -> {
                     // Usar HashMap en lugar de Map.of() para permitir valores nulos
                     Map<String, Object> response = new HashMap<>();
-                    response.put("id_nino", nino.getId_nino());
+                    response.put("id_nino", nino.getIdNino());
                     response.put("nombre", nino.getNombre() != null ? nino.getNombre() : "");
                     response.put("edad", nino.getEdad());
                     response.put("genero", nino.getGenero() != null ? nino.getGenero() : "");
