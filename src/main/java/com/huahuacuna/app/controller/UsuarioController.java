@@ -80,7 +80,7 @@ public class UsuarioController {
         Usuario saved = usuarioService.registrar(usuario);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "usuarioId", saved.getId_usuario(),
+                "usuarioId", saved.getIdUsuario(),
                 "correo", saved.getCorreo(),
                 "nombre", saved.getNombre()
         ));
@@ -159,7 +159,7 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("mensaje", "Debe iniciar sesión para cambiar la contraseña."));
         }
 
-        boolean cambiado = usuarioService.cambiarContrasena(usuario.getId_usuario(), dto.getContrasenaActual(), dto.getNuevaContrasena());
+        boolean cambiado = usuarioService.cambiarContrasena(usuario.getIdUsuario(), dto.getContrasenaActual(), dto.getNuevaContrasena());
         if (cambiado) {
             return ResponseEntity.ok(Map.of("mensaje", "Contraseña cambiada correctamente."));
         } else {
