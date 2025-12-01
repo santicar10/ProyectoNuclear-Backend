@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-11-2025 a las 22:02:18
+-- Tiempo de generación: 01-12-2025 a las 04:19:29
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -33,8 +33,15 @@ CREATE TABLE `apadrinamientos` (
   `id_nino` int(11) NOT NULL,
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date DEFAULT NULL,
-  `estado` enum('Activo','Finalizado','Pendiente') DEFAULT 'Activo'
+  `estado` enum('ACTIVO','FINALIZADO','PENDIENTE') DEFAULT 'ACTIVO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `apadrinamientos`
+--
+
+INSERT INTO `apadrinamientos` (`id_apadrinamiento`, `id_padrino`, `id_nino`, `fecha_inicio`, `fecha_fin`, `estado`) VALUES
+(1, 6, 4, '2025-11-30', NULL, 'ACTIVO');
 
 -- --------------------------------------------------------
 
@@ -44,12 +51,19 @@ CREATE TABLE `apadrinamientos` (
 
 CREATE TABLE `bitacora` (
   `id_bitacora` int(11) NOT NULL,
-  `id_nino` int(11) NOT NULL,
-  `fecha_registro` date NOT NULL,
-  `descripcion` text NOT NULL,
+  `id_apadrinamiento` int(11) NOT NULL,
+  `fecha_registro` date NOT NULL DEFAULT curdate(),
+  `descripcion` varchar(255) DEFAULT NULL,
   `foto_url` varchar(255) DEFAULT NULL,
   `video_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `bitacora`
+--
+
+INSERT INTO `bitacora` (`id_bitacora`, `id_apadrinamiento`, `fecha_registro`, `descripcion`, `foto_url`, `video_url`) VALUES
+(1, 1, '2025-11-30', 'la niña participó en actividades de lectura', '', '');
 
 -- --------------------------------------------------------
 
@@ -74,13 +88,62 @@ CREATE TABLE `contenido` (
 --
 
 CREATE TABLE `donaciones` (
-  `id_donacion` int(11) NOT NULL,
+  `id_donacion` bigint(20) NOT NULL,
   `id_usuario` int(11) NOT NULL,
   `tipo` enum('monetaria','material') NOT NULL,
-  `monto` decimal(10,2) DEFAULT NULL,
+  `monto` decimal(38,2) DEFAULT NULL,
   `descripcion` text DEFAULT NULL,
-  `fecha_donacion` date NOT NULL,
-  `estado` enum('pendiente','completada','cancelada') DEFAULT 'pendiente'
+  `fecha_donacion` datetime(6) DEFAULT NULL,
+  `estado` enum('pendiente','completada','cancelada') DEFAULT 'pendiente',
+  `banco` varchar(255) DEFAULT NULL,
+  `correo_electronico` varchar(255) DEFAULT NULL,
+  `nit` varchar(255) DEFAULT NULL,
+  `tipo_dotacion` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `eventos`
+--
+
+CREATE TABLE `eventos` (
+  `id` bigint(20) NOT NULL,
+  `activo` bit(1) DEFAULT NULL,
+  `descripcion` text NOT NULL,
+  `descripcion_detallada` text DEFAULT NULL,
+  `fecha_actualizacion` datetime(6) DEFAULT NULL,
+  `fecha_creacion` datetime(6) DEFAULT NULL,
+  `fecha_evento` datetime(6) DEFAULT NULL,
+  `horario` varchar(255) DEFAULT NULL,
+  `imagen_url` varchar(255) DEFAULT NULL,
+  `lugar` varchar(255) DEFAULT NULL,
+  `titulo` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `eventos`
+--
+
+INSERT INTO `eventos` (`id`, `activo`, `descripcion`, `descripcion_detallada`, `fecha_actualizacion`, `fecha_creacion`, `fecha_evento`, `horario`, `imagen_url`, `lugar`, `titulo`) VALUES
+(1, b'1', 'Un evento para promover el arte local y la cultura regional.', 'Plaza Central, Huahuacuna', '2025-11-13 11:35:18.000000', '2025-11-13 11:35:18.000000', '2024-11-13 10:30:00.000000', '2 a 4 ', NULL, 'armenia', 'Festival Cultural 2025'),
+(3, b'1', 'Un evento para promover el deporte y la cultura regional.', 'Plaza Central, cordoba', '2025-11-13 11:40:57.000000', '2025-11-13 11:37:01.000000', '2026-03-12 10:30:00.000000', '2 a 6 ', NULL, 'cordoba', 'Festival de deportes 2026'),
+(5, b'1', 'Un evento para promover el arte local y la cultura regional.', 'Plaza Central, cordoba', '2025-11-13 11:38:38.000000', '2025-11-13 11:38:38.000000', '2026-01-12 10:30:00.000000', '10 a 6 ', NULL, 'cordoba', 'Festival Cultural 2026');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `inscripcion_evento`
+--
+
+CREATE TABLE `inscripcion_evento` (
+  `id` bigint(20) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `estado` enum('CANCELADO','CONFIRMADO') DEFAULT NULL,
+  `fecha_inscripcion` datetime(6) DEFAULT NULL,
+  `nombre_completo` varchar(255) NOT NULL,
+  `telefono` varchar(255) DEFAULT NULL,
+  `evento_id` bigint(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -92,21 +155,24 @@ CREATE TABLE `donaciones` (
 CREATE TABLE `ninos` (
   `id_nino` int(11) NOT NULL,
   `nombre` varchar(255) NOT NULL,
-  `edad` int(11) NOT NULL,
   `genero` varchar(255) NOT NULL,
   `descripcion` varchar(500) DEFAULT NULL,
   `foto_url` varchar(255) DEFAULT NULL,
   `estado_apadrinamiento` enum('Disponible','Apadrinado','Inactivo') DEFAULT 'Disponible',
-  `fecha_registro` date DEFAULT curdate()
+  `fecha_registro` date DEFAULT curdate(),
+  `fecha_nacimiento` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `ninos`
 --
 
-INSERT INTO `ninos` (`id_nino`, `nombre`, `edad`, `genero`, `descripcion`, `foto_url`, `estado_apadrinamiento`, `fecha_registro`) VALUES
-(1, 'pepito', 8, 'masculino', 'Niño timido y responsable', 'aaaa', 'Apadrinado', '2025-11-02'),
-(3, 'pepe', 9, 'masculino', 'Niño estrovertido y alegre', 'eeee', 'Disponible', '2025-11-02');
+INSERT INTO `ninos` (`id_nino`, `nombre`, `genero`, `descripcion`, `foto_url`, `estado_apadrinamiento`, `fecha_registro`, `fecha_nacimiento`) VALUES
+(1, 'pepito', 'masculino', 'Niño timido y responsable', 'aaaa', 'Apadrinado', '2025-11-02', '2016-02-08'),
+(3, 'pepe', 'masculino', 'Niño estrovertido y alegre', 'eeee', 'Disponible', '2025-11-02', '2017-11-01'),
+(4, 'catalina', 'FEMENINO', 'niña feliz', NULL, 'Disponible', '2025-11-30', '2018-08-24'),
+(5, 'pablito', 'MASCULINO', 'niño introvertido', NULL, 'Disponible', '2025-11-30', '2019-12-01'),
+(6, 'pablito', 'MASCULINO', 'niño introvertido', NULL, 'Disponible', '2025-11-30', '2019-12-01');
 
 -- --------------------------------------------------------
 
@@ -174,9 +240,10 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`id_usuario`, `nombre`, `correo`, `contrasena`, `telefono`, `direccion`, `rol`, `fecha_creacion`, `estado`, `recovery_code`, `recovery_expiry`) VALUES
 (1, 'Juan Pérez', 'juan@gmail.com', '12345', '3001234567', 'Calle 10 #5-20', 'padrino', '2025-10-13', 'activo', NULL, NULL),
 (2, 'Juan Perez', 'juan.perez@example.com', '12345678', '3001234567', 'Calle 123', 'voluntario', '2025-10-18', 'activo', NULL, NULL),
-(3, 'Juan Diego', 't4mara95@gmail.com', 'go7BmK4t', '3001234567', 'Calle 123', 'administrador', '2025-10-18', 'activo', NULL, NULL),
+(3, 'Juan Diego', 't4mara95@gmail.com', 'tamara26', '3001234567', 'Calle 123', 'administrador', '2025-10-18', 'activo', NULL, NULL),
 (4, 'Juanito perez', 'juanperez@example.com', '56789', '30000004', 'Centro', 'voluntario', '2025-10-19', 'activo', NULL, NULL),
-(5, 'jose', 'jose123@gmail.com', 'jose20', NULL, NULL, 'voluntario', '2025-11-02', 'activo', NULL, NULL);
+(5, 'jose', 'jose123@gmail.com', 'jose20', NULL, NULL, 'voluntario', '2025-11-02', 'activo', NULL, NULL),
+(6, 'Juan Pérez', 'juan@example.com', '12345678', NULL, NULL, 'padrino', '2025-11-30', 'activo', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -216,7 +283,7 @@ ALTER TABLE `apadrinamientos`
 --
 ALTER TABLE `bitacora`
   ADD PRIMARY KEY (`id_bitacora`),
-  ADD KEY `id_nino` (`id_nino`);
+  ADD KEY `fk_bitacora_apadrinamiento` (`id_apadrinamiento`);
 
 --
 -- Indices de la tabla `contenido`
@@ -230,6 +297,19 @@ ALTER TABLE `contenido`
 ALTER TABLE `donaciones`
   ADD PRIMARY KEY (`id_donacion`),
   ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `eventos`
+--
+ALTER TABLE `eventos`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indices de la tabla `inscripcion_evento`
+--
+ALTER TABLE `inscripcion_evento`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `FK71elhj0i579brg8x57pfjjovv` (`evento_id`);
 
 --
 -- Indices de la tabla `ninos`
@@ -271,13 +351,13 @@ ALTER TABLE `voluntariado`
 -- AUTO_INCREMENT de la tabla `apadrinamientos`
 --
 ALTER TABLE `apadrinamientos`
-  MODIFY `id_apadrinamiento` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_apadrinamiento` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  MODIFY `id_bitacora` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_bitacora` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `contenido`
@@ -289,13 +369,25 @@ ALTER TABLE `contenido`
 -- AUTO_INCREMENT de la tabla `donaciones`
 --
 ALTER TABLE `donaciones`
-  MODIFY `id_donacion` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_donacion` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `eventos`
+--
+ALTER TABLE `eventos`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `inscripcion_evento`
+--
+ALTER TABLE `inscripcion_evento`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `ninos`
 --
 ALTER TABLE `ninos`
-  MODIFY `id_nino` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id_nino` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `noticias`
@@ -313,7 +405,7 @@ ALTER TABLE `proyectos`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `voluntariado`
@@ -336,13 +428,19 @@ ALTER TABLE `apadrinamientos`
 -- Filtros para la tabla `bitacora`
 --
 ALTER TABLE `bitacora`
-  ADD CONSTRAINT `bitacora_ibfk_1` FOREIGN KEY (`id_nino`) REFERENCES `ninos` (`id_nino`);
+  ADD CONSTRAINT `fk_bitacora_apadrinamiento` FOREIGN KEY (`id_apadrinamiento`) REFERENCES `apadrinamientos` (`id_apadrinamiento`);
 
 --
 -- Filtros para la tabla `donaciones`
 --
 ALTER TABLE `donaciones`
   ADD CONSTRAINT `donaciones_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`);
+
+--
+-- Filtros para la tabla `inscripcion_evento`
+--
+ALTER TABLE `inscripcion_evento`
+  ADD CONSTRAINT `FK71elhj0i579brg8x57pfjjovv` FOREIGN KEY (`evento_id`) REFERENCES `eventos` (`id`);
 
 --
 -- Filtros para la tabla `voluntariado`
