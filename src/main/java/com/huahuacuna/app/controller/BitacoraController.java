@@ -68,7 +68,7 @@ public class BitacoraController {
     // Crear nueva entrada (solo admin)
     @PostMapping("/nino/{ninoId}")
     public ResponseEntity<?> crearEntrada(
-            @PathVariable Integer ninoId,
+            @PathVariable String ninoId,
             @Valid @RequestBody BitacoraDTO dto,
             HttpSession session) {
 
@@ -84,8 +84,12 @@ public class BitacoraController {
         }
 
         try {
-            BitacoraResponseDTO entrada = bitacoraService.crearEntrada(ninoId, dto);
+            Integer id = Integer.parseInt(ninoId);
+            BitacoraResponseDTO entrada = bitacoraService.crearEntrada(id, dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(entrada);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("mensaje", "El ID del niño debe ser un número válido, recibido: " + ninoId));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("mensaje", e.getMessage()));
