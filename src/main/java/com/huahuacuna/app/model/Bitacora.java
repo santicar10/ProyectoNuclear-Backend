@@ -3,7 +3,6 @@ package com.huahuacuna.app.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Id;
 import java.time.LocalDate;
 
 @Entity
@@ -18,13 +17,18 @@ public class Bitacora {
     private Integer idBitacora;
 
     @ManyToOne
-    @JoinColumn(name = "id_apadrinamiento", nullable = false)
-    private Apadrinamiento apadrinamiento;
+    @JoinColumn(name = "id_nino", nullable = false)
+    private Nino nino;
 
     @Column(name = "fecha_registro", nullable = false)
     private LocalDate fechaRegistro = LocalDate.now();
 
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
+    
+    @Column(name = "foto_url")
     private String fotoUrl;
+    
+    @Column(name = "video_url")
     private String videoUrl;
 }

@@ -1,14 +1,22 @@
+// src/main/java/com/huahuacuna/app/DTO/BitacoraDTO.java
 package com.huahuacuna.app.DTO;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BitacoraDTO {
 
-    private Integer idApadrinamiento;
+    @NotNull(message = "El ID del niño es obligatorio")
+    private Integer ninoId;
+    
+    @NotBlank(message = "La descripción es obligatoria")
     private String descripcion;
-    private String fotoUrl;
-    private String videoUrl;
+    
+    private String imagen;  // URL de imagen
 }
